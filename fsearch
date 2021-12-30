@@ -1,0 +1,119 @@
+#!/bin/python3
+
+import os
+import sys
+import getopt
+from colorama import Fore
+from pyfiglet import Figlet
+
+
+home = Figlet(font='standard')
+_home = home.renderText('                   FILES')
+
+locations = []
+rmode = False
+
+def usage():
+    print(Fore.WHITE+"fsearch File Searching tool...")
+    print("fsearch [option] <filename>")
+    print("-h, --help               print help menu (this menu)")
+    print("-f, --file               file name")
+    print("-d, --dir                directory name (if searching for directory)")
+    print("-v, --version            print version number")
+    print("-i, --info               print information about fsearch")
+    #print("-c, --copy               copy text from the file")
+    print("-t, --type               search specific type of file")
+    print("-r, --root		    search from root directory")
+    print("Example :")
+    print("fsearch -f myfile.py\nor")
+    print("fsearch -d mydir")
+    sys.exit(0)
+
+def print_version():
+    print(Fore.WHITE+"Version : "+str(1.0))
+
+def print_info():
+    print(Fore.WHITE+"info : Tool used to search for files and directories")
+
+def find_file(filename):
+    print(Fore.WHITE+"\nSearching for file ", filename, "...")
+    try:
+        for (root, dirs, files) in os.walk('.', topdown=True):
+            if filename in files:
+                locations.append(root)
+        if len(locations) > 0:
+        	print(Fore.YELLOW + "[*]", Fore.GREEN + filename, Fore.WHITE + "Found in ", Fore.GREEN + str(len(locations)), "Locations :")
+        else:
+        	print(Fore.RED + "File {} is not available at given location".format(filename))
+        for loc in locations:
+                print(Fore.MAGENTA + loc)
+    except KeyboardInterrupt as e:
+        print(Fore.BLUE+"\nBye...")
+
+def search_spec(exten):
+    print(Fore.WHITE+"\nSearching for *."+exten, " files...")
+    for root,dirs,files in os.walk('/', topdown=True):
+        for name in files:
+            if name.endswith("."+exten):
+                locations.append(os.path.join(root,name))
+    if len(locations) > 0:
+        print(Fore.YELLOW+"[*] "+Fore.WHITE+str(len(locations))+" files found :")
+        for loc in locations:
+            print(loc)
+    else:
+        print(Fore.RED+"No file found")
+
+def copy_file_text():
+    for location in locations:
+        print("\nData for location -> ", location)
+        f = open(location + "\\" + filename,"r")
+        x = f.readlines()
+        f.close()
+        print()
+        for i in x:
+            print(i)
+
+def find_dir(dirn):
+    print(Fore.WHITE + "Searching for directory {}...".format(dirn))
+    try:
+        for root,dirs,files in os.walk('/', topdown=True):
+            if dirn in dirs:
+                print(Fore.YELLOW + os.path.join(root,dirn))
+    except KeyboardInterrupt as e:
+        print("\nBye...")
+
+def main():
+    print(Fore.YELLOW+_home+Fore.WHITE)
+    if not len(sys.argv[1:]):
+        usage()
+    try:
+        opts,args = getopt.getopt(sys.argv[1:], "viha:f:d:c:t:l:a",["version","info","help", "file","dir","copy","type", "location"])
+    except getopt.GetoptError as e:
+        print(Fore.RED+str(e)+Fore.WHITE)
+        usage()
+
+    for o,a in opts:
+        if o in ("-f","--file"):
+            find_file(a)
+        elif o in ("-t", "--type"):
+            search_spec(a)
+        elif o in ("-d", "--dir"):
+            find_dir(a)
+        elif o in ("-v","--version"):
+            print_version()
+        elif o in ("-i", "--info"):
+            print_info()
+        elif o in ("-h","--help"):
+            usage()
+        elif o in ("-c","--copy"):
+            copy_file_text()
+
+        else:
+            assert False,"Unhandled Option"
+
+if __name__ == "__main__":
+    main()
+    """find_file()
+    op = input("\nCopy data (Y or y for yes) : ")
+    if op == 'Y' or 'y':
+        copy_file()"""
